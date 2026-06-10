@@ -1,646 +1,693 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>攤車打卡</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Zen+Dots&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>阿桂嬤養生湯飲｜限動圖片產生器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #111010;
-  --surface: #1c1b1a;
-  --surface2: #252422;
-  --border: #333230;
-  --accent: #ff9500;
-  --green: #34c759;
-  --blue: #3d8eff;
-  --red: #ff3b30;
-  --text: #f2ede4;
-  --muted: #7a7670;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; }
-body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100dvh; }
+  :root{
+    --green-deep:#16291e;
+    --green:#1d3a2a;
+    --green-ink:#2b4a36;
+    --cream:#f3ead2;
+    --cream-soft:#efe4c6;
+    --red:#a32a22;
+    --gold:#c9a85c;
+    --gold-soft:#b9954a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Noto Sans TC',sans-serif;
+    background:
+      repeating-linear-gradient(45deg, rgba(255,255,255,.018) 0 2px, transparent 2px 14px),
+      linear-gradient(180deg,#1a3326,#142619);
+    color:var(--cream);
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  header{
+    text-align:center;
+    padding:26px 16px 14px;
+  }
+  header h1{
+    font-family:'Noto Serif TC',serif;
+    font-weight:900;
+    font-size:1.45rem;
+    letter-spacing:.18em;
+    color:var(--cream);
+  }
+  header .sub{
+    margin-top:6px;
+    font-size:.78rem;
+    letter-spacing:.3em;
+    color:var(--gold);
+  }
+  .divider{
+    width:160px;margin:14px auto 0;
+    display:flex;align-items:center;gap:10px;
+  }
+  .divider::before,.divider::after{
+    content:"";flex:1;height:1px;
+    background:linear-gradient(90deg,transparent,var(--gold-soft));
+  }
+  .divider::after{background:linear-gradient(90deg,var(--gold-soft),transparent)}
+  .divider span{color:var(--gold);font-size:.7rem}
 
-/* ── HEADER ── */
-header {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(17,16,16,0.95); backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
-  padding: 14px 20px 12px;
-}
-.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.app-title { font-family: 'Zen Dots', monospace; font-size: 18px; color: var(--accent); }
-.header-right { display: flex; align-items: center; gap: 8px; }
-.conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
-.conn-dot.on { background: var(--green); box-shadow: 0 0 4px var(--green); }
-.icon-btn {
-  width: 34px; height: 34px; border-radius: 9px;
-  background: var(--surface2); border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; cursor: pointer; transition: background 0.15s;
-}
-.icon-btn:active { background: var(--border); }
+  main{max-width:520px;margin:0 auto;padding:0 14px}
 
-/* ── TODAY STATS BAR ── */
-.stats-bar {
-  display: flex; gap: 8px;
-}
-.stat-pill {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 8px; padding: 6px 12px;
-  display: flex; align-items: center; gap: 6px;
-  font-size: 12px;
-}
-.stat-num { font-family: 'Zen Dots', monospace; font-size: 15px; color: var(--accent); }
-.stat-money { color: var(--green); }
-.rate-input {
-  background: transparent; border: none; outline: none;
-  font-family: 'Zen Dots', monospace; font-size: 15px;
-  color: var(--green); width: 60px; text-align: right;
-  font-weight: 700;
-}
+  .panel{
+    background:rgba(0,0,0,.22);
+    border:1px solid rgba(201,168,92,.35);
+    border-radius:14px;
+    padding:16px;
+    margin-top:16px;
+  }
+  .panel h2{
+    font-family:'Noto Serif TC',serif;
+    font-size:.95rem;
+    font-weight:700;
+    letter-spacing:.25em;
+    color:var(--gold);
+    margin-bottom:12px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .panel h2::after{content:"";flex:1;height:1px;background:rgba(201,168,92,.25)}
 
-/* ── DATE TABS ── */
-.date-tabs {
-  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
-  padding: 12px 20px 0;
-}
-.date-tabs::-webkit-scrollbar { display: none; }
-.date-tab {
-  flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
-  border: 1px solid var(--border); background: transparent;
-  color: var(--muted); font-size: 12px; cursor: pointer;
-  font-family: 'Noto Sans TC', sans-serif; transition: all 0.15s;
-  white-space: nowrap;
-}
-.date-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(255,149,0,0.1); }
+  /* segmented mode toggle */
+  .seg{
+    display:flex;border:1px solid var(--gold-soft);border-radius:10px;overflow:hidden;
+  }
+  .seg button{
+    flex:1;padding:11px 0;border:0;cursor:pointer;
+    background:transparent;color:var(--cream);
+    font-family:'Noto Serif TC',serif;font-weight:700;font-size:1rem;letter-spacing:.3em;
+    transition:background .15s;
+  }
+  .seg button.active{background:var(--red);color:var(--cream)}
 
-/* ── MAIN ── */
-main { padding: 16px 16px 120px; }
+  label.field{display:block;margin-top:12px;font-size:.8rem;color:#cfc4a2;letter-spacing:.08em}
+  input[type="date"],input[type="text"],textarea{
+    width:100%;margin-top:6px;
+    background:var(--cream);color:#23311f;
+    border:1px solid var(--gold-soft);border-radius:9px;
+    padding:11px 12px;font-size:1rem;font-family:'Noto Sans TC',sans-serif;
+  }
+  textarea{resize:vertical;min-height:74px;line-height:1.6}
+  input:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
 
-/* ── VENDOR CARDS ── */
-.vendor-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-.vendor-card {
-  background: var(--surface);
-  border: 2px solid var(--border);
-  border-radius: 18px;
-  padding: 20px 14px 16px;
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-  cursor: pointer; transition: all 0.18s;
-  position: relative; user-select: none;
-  min-height: 130px; justify-content: center;
-}
-.vendor-card:active { transform: scale(0.95); }
-.vendor-card.done {
-  border-color: var(--green);
-  background: rgba(52,199,89,0.08);
-}
-.vendor-icon { font-size: 44px; line-height: 1; transition: transform 0.2s; }
-.vendor-card.done .vendor-icon { transform: scale(0.85); }
-.vendor-name { font-size: 14px; font-weight: 700; text-align: center; }
-.vendor-time {
-  font-size: 11px; color: var(--green); font-weight: 600;
-  background: rgba(52,199,89,0.12); border: 1px solid rgba(52,199,89,0.25);
-  border-radius: 6px; padding: 2px 8px;
-}
-.done-badge {
-  position: absolute; top: 10px; right: 10px;
-  width: 22px; height: 22px; border-radius: 50%;
-  background: var(--green); display: flex; align-items: center; justify-content: center;
-  font-size: 13px; opacity: 0; transition: opacity 0.2s;
-}
-.vendor-card.done .done-badge { opacity: 1; }
-.vendor-contact {
-  font-size: 10px; color: var(--muted); text-align: center;
-}
-.vendor-card.long-pressing {
-  border-color: var(--blue);
-  background: rgba(61,142,255,0.08);
-}
+  /* item checkboxes */
+  .items{display:flex;flex-direction:column;gap:8px}
+  .item{
+    display:flex;align-items:center;gap:10px;
+    background:rgba(243,234,210,.06);
+    border:1px solid rgba(201,168,92,.28);
+    border-radius:10px;padding:10px 12px;cursor:pointer;
+    transition:background .15s,border-color .15s;
+  }
+  .item.checked{background:rgba(243,234,210,.14);border-color:var(--gold)}
+  .item input{width:19px;height:19px;accent-color:var(--red);flex:none}
+  .item .name{
+    font-family:'Noto Serif TC',serif;font-weight:700;font-size:1rem;color:var(--cream);
+    flex:1;letter-spacing:.05em;
+  }
+  .badge{
+    flex:none;font-size:.66rem;font-weight:700;letter-spacing:.15em;
+    padding:3px 7px;border-radius:5px;color:var(--cream);
+  }
+  .badge.hot{background:var(--red)}
+  .badge.nosugar{background:var(--green-ink);border:1px solid var(--gold-soft)}
+  .item .price{flex:none;color:var(--gold);font-weight:700;font-size:.92rem}
 
-/* ── EMPTY ── */
-.empty-state {
-  text-align: center; padding: 60px 20px;
-  color: var(--muted); font-size: 14px;
-}
-.empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .hint{margin-top:10px;font-size:.75rem;color:#a89d7c;line-height:1.7}
 
-/* ── BOTTOM SUMMARY ── */
-.bottom-summary {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: rgba(17,16,16,0.97); backdrop-filter: blur(12px);
-  border-top: 1px solid var(--border);
-  padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
-  display: flex; align-items: center; gap: 12px;
-}
-.summary-text { flex: 1; }
-.summary-done { font-size: 22px; font-weight: 900; }
-.summary-done span { color: var(--green); font-family: 'Zen Dots', monospace; }
-.summary-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
-.summary-earning {
-  text-align: right;
-}
-.earning-num {
-  font-family: 'Zen Dots', monospace;
-  font-size: 22px; font-weight: 700; color: var(--accent);
-}
-.earning-label { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  /* preview */
+  #previewWrap{
+    margin-top:16px;text-align:center;
+  }
+  #previewImg{
+    width:100%;max-width:340px;border-radius:14px;
+    border:1px solid rgba(201,168,92,.5);
+    box-shadow:0 14px 40px rgba(0,0,0,.5);
+    display:block;margin:0 auto;
+  }
+  .save-tip{margin-top:10px;font-size:.8rem;color:var(--gold);letter-spacing:.05em}
 
-/* ── MODALS ── */
-.modal-overlay {
-  position: fixed; inset: 0; z-index: 500;
-  background: rgba(0,0,0,0.72);
-  display: flex; align-items: flex-end;
-  opacity: 0; pointer-events: none; transition: opacity 0.25s;
-}
-.modal-overlay.open { opacity: 1; pointer-events: all; }
-.modal-sheet {
-  width: 100%; background: var(--surface);
-  border-radius: 22px 22px 0 0;
-  padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
-  transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-  max-height: 90dvh; overflow-y: auto;
-}
-.modal-overlay.open .modal-sheet { transform: translateY(0); }
-.modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
-.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
-.modal-field { margin-bottom: 14px; }
-.input-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; display: block; }
-.input-field {
-  width: 100%; background: var(--surface2);
-  border: 1px solid var(--border); border-radius: 10px;
-  color: var(--text); padding: 11px 14px;
-  font-size: 15px; font-family: 'Noto Sans TC', sans-serif;
-  outline: none; transition: border-color 0.15s;
-}
-.input-field:focus { border-color: var(--accent); }
-.emoji-picker { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-.emoji-opt {
-  width: 46px; height: 46px; border-radius: 10px;
-  background: var(--surface2); border: 2px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 26px; cursor: pointer; transition: all 0.12s;
-}
-.emoji-opt.selected { border-color: var(--accent); background: rgba(255,149,0,0.1); }
-.modal-actions { display: flex; gap: 8px; margin-top: 20px; }
-.modal-btn {
-  flex: 1; padding: 13px; border-radius: 12px;
-  font-size: 14px; font-weight: 700; cursor: pointer; border: none;
-  font-family: 'Noto Sans TC', sans-serif; transition: all 0.15s;
-}
-.modal-btn.save   { background: var(--accent); color: #111; }
-.modal-btn.cancel { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
-.modal-btn.delete { background: rgba(255,59,48,0.1); color: var(--red); border: 1px solid rgba(255,59,48,0.2); }
+  .btn-dl{
+    display:block;width:100%;margin-top:14px;
+    padding:15px 0;border:0;border-radius:12px;cursor:pointer;
+    background:linear-gradient(180deg,#b8352b,#8f231c);
+    color:var(--cream);
+    font-family:'Noto Serif TC',serif;font-weight:900;font-size:1.15rem;letter-spacing:.4em;text-indent:.4em;
+    box-shadow:0 6px 18px rgba(0,0,0,.4), inset 0 0 0 1px rgba(201,168,92,.6);
+  }
+  .btn-dl:active{transform:translateY(1px)}
 
-/* ── UNDO TOAST ── */
-.toast {
-  position: fixed; bottom: 90px; left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 12px; padding: 10px 16px;
-  font-size: 13px; z-index: 800;
-  opacity: 0; transition: all 0.25s; white-space: nowrap;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-  display: flex; align-items: center; gap: 10px;
-}
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.toast-undo {
-  color: var(--accent); font-weight: 700; cursor: pointer;
-  padding: 2px 6px; border-radius: 5px;
-}
-.toast-undo:active { background: rgba(255,149,0,0.15); }
+  .warn{
+    display:none;margin-top:14px;padding:12px 14px;border-radius:10px;
+    background:rgba(163,42,34,.18);border:1px solid var(--red);
+    color:#f0d9d2;font-size:.82rem;line-height:1.7;
+  }
+  .warn.show{display:block}
 
-/* ── LOADING ── */
-.loading-screen {
-  position: fixed; inset: 0; background: var(--bg);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 14px; z-index: 999;
-}
-.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-@media (min-width: 480px) {
-  .vendor-grid { grid-template-columns: repeat(3, 1fr); }
-}
+  footer{
+    text-align:center;margin-top:34px;
+    font-size:.72rem;letter-spacing:.25em;color:#7d8d76;
+  }
+  .holiday-only{display:none}
+  body.mode-holiday .holiday-only{display:block}
+  body.mode-holiday .open-only{display:none}
 </style>
 </head>
 <body>
 
-<div class="loading-screen" id="loading-screen">
-  <div class="spinner"></div>
-  <div style="color:var(--muted);font-size:13px">連線中…</div>
-</div>
-
-<!-- ── HEADER ── -->
 <header>
-  <div class="header-top">
-    <div class="app-title">🛒 攤車打卡</div>
-    <div class="header-right">
-      <div class="conn-dot" id="conn-dot"></div>
-      <div class="icon-btn" onclick="openSettings()" title="設定">⚙️</div>
-      <div class="icon-btn" onclick="openAddVendor()" title="新增攤商">＋</div>
-    </div>
-  </div>
-  <div class="stats-bar">
-    <div class="stat-pill">
-      <span style="color:var(--muted);font-size:11px">今日完成</span>
-      <span class="stat-num" id="stat-done">0</span>
-      <span style="color:var(--muted);font-size:11px">攤</span>
-    </div>
-    <div class="stat-pill">
-      <span style="color:var(--muted);font-size:11px">每攤</span>
-      <input class="rate-input" id="rate-input" type="number" inputmode="numeric" value="100" min="1">
-      <span style="color:var(--muted);font-size:11px">元</span>
-    </div>
-    <div class="stat-pill" style="flex:1;justify-content:flex-end">
-      <span style="color:var(--muted);font-size:11px">收入</span>
-      <span class="stat-num stat-money" id="stat-money">$0</span>
-    </div>
-  </div>
+  <h1>阿桂嬤養生湯飲</h1>
+  <div class="sub">IG 限動圖片產生器</div>
+  <div class="divider"><span>❖</span></div>
 </header>
 
-<!-- ── DATE TABS ── -->
-<div class="date-tabs" id="date-tabs"></div>
-
-<!-- ── MAIN CONTENT ── -->
 <main>
-  <div class="vendor-grid" id="vendor-grid"></div>
+  <div class="warn" id="logoWarn">
+    ⚠ 找不到 <b>logo.png</b>。請將 logo 圖檔命名為 <b>logo.png</b>，和這個網頁放在同一個資料夾，圖片才會顯示完整商標。
+  </div>
+
+  <section class="panel">
+    <h2>今日狀態</h2>
+    <div class="seg" role="tablist">
+      <button id="modeOpen" class="active" type="button">出　攤</button>
+      <button id="modeHoliday" type="button">公　休</button>
+    </div>
+
+    <label class="field">日期
+      <input type="date" id="inpDate">
+    </label>
+
+    <div class="open-only">
+      <label class="field">擺攤地點
+        <input type="text" id="inpPlace" value="台南花園夜市" placeholder="例：台南花園夜市">
+      </label>
+      <label class="field">攤位位置（選填）
+        <input type="text" id="inpSpot" placeholder="例：C 區 12 號攤位" value="">
+      </label>
+      <label class="field">補充說明（選填，會顯示在地點下方）
+        <input type="text" id="inpNote" placeholder="例：營業到午夜 12 點・賣完為止" value="">
+      </label>
+    </div>
+
+    <div class="holiday-only">
+      <label class="field">公休訊息
+        <textarea id="inpHolidayMsg">好好休息，養精蓄銳
+我們擇日再相見！</textarea>
+      </label>
+    </div>
+  </section>
+
+  <section class="panel open-only">
+    <h2>今日供應品項</h2>
+    <div class="items" id="itemList"></div>
+    <p class="hint">勾選今天有賣的品項。建議 4～6 款版面最好看；全選 8 款也放得下。</p>
+  </section>
+
+  <section id="previewWrap">
+    <img id="previewImg" alt="限動圖片預覽">
+    <p class="save-tip">📱 手機：長按上方圖片即可儲存到相簿</p>
+    <button class="btn-dl" id="btnDownload" type="button">下載圖片</button>
+  </section>
 </main>
 
-<!-- ── BOTTOM SUMMARY ── -->
-<div class="bottom-summary">
-  <div class="summary-text">
-    <div class="summary-done">完成 <span id="sum-done">0</span> 攤</div>
-    <div class="summary-sub" id="sum-sub">今天還沒有打卡紀錄</div>
-  </div>
-  <div class="summary-earning">
-    <div class="earning-num" id="sum-money">$0</div>
-    <div class="earning-label">預估收入</div>
-  </div>
-</div>
+<footer>現點現調 ・ 天然熬煮 ・ 無添加香精</footer>
 
-<!-- ── MODAL: VENDOR ── -->
-<div class="modal-overlay" id="vendor-modal" onclick="closeVendorModal(event)">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="vendor-modal-title">新增攤商</div>
-    <div class="modal-field">
-      <label class="input-label">攤商名稱</label>
-      <input class="input-field" id="vm-name" type="text" placeholder="例：滷味攤">
-    </div>
-    <div class="modal-field">
-      <label class="input-label">代表字（輸入一個字，例：望、餃、蒜）</label>
-      <input class="input-field" id="vm-icon-char" type="text" maxlength="1" placeholder="例：望"
-        style="font-size:36px;text-align:center;height:72px;font-weight:900;letter-spacing:0">
-    </div>
-    <div class="modal-field">
-      <label class="input-label">聯絡人</label>
-      <input class="input-field" id="vm-contact" type="text" placeholder="例：陳老闆">
-    </div>
-    <div class="modal-field">
-      <label class="input-label">聯絡電話</label>
-      <input class="input-field" id="vm-phone" type="tel" placeholder="例：0912-345-678">
-    </div>
-    <div class="modal-field">
-      <label class="input-label">備註</label>
-      <input class="input-field" id="vm-note" type="text" placeholder="例：大台車">
-    </div>
-    <div class="modal-actions" id="vendor-modal-actions"></div>
-  </div>
-</div>
+<canvas id="cv" width="1080" height="1920" style="display:none"></canvas>
 
-<!-- ── MODAL: SETTINGS ── -->
-<div class="modal-overlay" id="settings-modal" onclick="closeSettingsModal(event)">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">⚙️ 設定</div>
-    <div class="modal-field">
-      <label class="input-label">每攤收費（元）</label>
-      <input class="input-field" id="sm-rate" type="number" inputmode="numeric" placeholder="例：100">
-    </div>
-    <div style="margin-top:8px;padding:14px;background:var(--surface2);border-radius:10px;font-size:13px;color:var(--muted)">
-      💡 修改後自動套用到今日統計
-    </div>
-    <div class="modal-actions">
-      <button class="modal-btn cancel" onclick="closeSettingsModal()">關閉</button>
-      <button class="modal-btn save" onclick="saveSettings()">儲存</button>
-    </div>
-  </div>
-</div>
+<script>
+/* ====== 品項資料（要改品名、價格、標籤，改這裡就好） ====== */
+const MENU = [
+  { name:"傳統酸梅湯",         price:60, badge:"招牌",  checked:true  },
+  { name:"冰糖菊花茶",         price:60, badge:"",      checked:true  },
+  { name:"菊花涼茶",           price:60, badge:"",      checked:false },
+  { name:"青草涼茶",           price:60, badge:"",      checked:true  },
+  { name:"陳皮紅茶",           price:60, badge:"",      checked:false },
+  { name:"女神補氣蘋果水",     price:60, badge:"",      checked:false },
+  { name:"牛蒡枸杞茶",         price:60, badge:"無糖",  checked:true  },
+  { name:"黑豆杜仲茶",         price:60, badge:"無糖",  checked:true  },
+];
+const IG_HANDLE = "@aguima.drinks";
+const FOOT_LINE = "現點現調 ・ 天然熬煮 ・ 無添加香精";
 
-<!-- ── TOAST ── -->
-<div class="toast" id="toast">
-  <span id="toast-msg"></span>
-  <span class="toast-undo" id="toast-undo" style="display:none" onclick="undoCheckin()">復原</span>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue, push, update, remove, set, serverTimestamp }
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDoT4cAuLGTC9ZAP3uG-0tRNRDsAD-l1-4",
-  authDomain: "nightmarket-tasks.firebaseapp.com",
-  databaseURL: "https://nightmarket-tasks-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "nightmarket-tasks",
-  storageBucket: "nightmarket-tasks.firebasestorage.app",
-  messagingSenderId: "241280209238",
-  appId: "1:241280209238:web:325be906e04a95987986f7"
+/* ====== 色票 ====== */
+const C = {
+  greenDeep:"#15281d", green:"#1d3a2a", greenInk:"#274532",
+  cream:"#f3ead2", creamDeep:"#ead9b4",
+  red:"#a32a22", redDeep:"#8c211a",
+  gold:"#c9a85c", goldSoft:"#b08e45", inkGreen:"#23402e",
 };
 
-const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
-const vendorsRef  = ref(db, 'vendors');
-const checkinsRef = ref(db, 'checkins');
-const settingsRef = ref(db, 'settings');
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+const W = 1080, H = 1920;
 
-let vendors   = {};
-let checkins  = {};   // { id: { vendorId, date, time, ts } }
-let settings  = { rate: 100 };
-let activeDate = todayStr();
-let lastUndoId = null;
-let toastTimer = null;
-let selectedEmoji = '🛒';
-let editingVendorId = null;
+let mode = "open";
+let logoImg = null, logoReady = false;
 
-// ── Utils ──
-function todayStr() {
-  return new Date().toISOString().slice(0, 10);
-}
-function fmtDate(iso) {
-  const d = new Date(iso + 'T00:00:00');
-  const days = ['週日','週一','週二','週三','週四','週五','週六'];
-  return `${days[d.getDay()]} ${d.getMonth()+1}/${d.getDate()}`;
-}
-function fmtTime(ts) {
-  if (!ts) return '';
-  const d = new Date(ts);
-  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-}
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+/* ---- 載入 logo ---- */
+(function loadLogo(){
+  const img = new Image();
+  img.onload = () => { logoImg = img; logoReady = true; scheduleRender(); };
+  img.onerror = () => { document.getElementById("logoWarn").classList.add("show"); scheduleRender(); };
+  img.src = "logo.png";
+})();
 
-// ── Connection ──
-onValue(ref(db, '.info/connected'), s => {
-  document.getElementById('conn-dot').className = 'conn-dot' + (s.val() ? ' on' : '');
+/* ---- 控制項初始化 ---- */
+const inpDate = document.getElementById("inpDate");
+(function(){
+  const t = new Date();
+  inpDate.value = t.getFullYear() + "-" + String(t.getMonth()+1).padStart(2,"0") + "-" + String(t.getDate()).padStart(2,"0");
+})();
+
+const itemList = document.getElementById("itemList");
+MENU.forEach((m,i)=>{
+  const row = document.createElement("label");
+  row.className = "item" + (m.checked ? " checked" : "");
+  row.innerHTML = `
+    <input type="checkbox" data-i="${i}" ${m.checked?"checked":""}>
+    <span class="name">${m.name}</span>
+    ${m.badge ? `<span class="badge ${m.badge==="招牌"?"hot":"nosugar"}">${m.badge}</span>` : ""}
+    <span class="price">$${m.price}</span>`;
+  itemList.appendChild(row);
+});
+itemList.addEventListener("change", e=>{
+  const i = +e.target.dataset.i;
+  MENU[i].checked = e.target.checked;
+  e.target.closest(".item").classList.toggle("checked", e.target.checked);
+  scheduleRender();
 });
 
-// ── Data ──
-let loaded = 0;
-function checkLoaded() { if (++loaded >= 3) document.getElementById('loading-screen').style.display = 'none'; }
-
-onValue(vendorsRef,  s => { vendors  = s.val() || {}; render(); checkLoaded(); });
-onValue(checkinsRef, s => { checkins = s.val() || {}; render(); checkLoaded(); });
-onValue(settingsRef, s => {
-  const v = s.val() || {};
-  settings.rate = v.rate || 100;
-  document.getElementById('rate-input').value = settings.rate;
-  updateStats();
-  checkLoaded();
-});
-
-// ── Rate input inline ──
-document.getElementById('rate-input').addEventListener('change', e => {
-  const val = parseInt(e.target.value) || 100;
-  settings.rate = val;
-  update(settingsRef, { rate: val });
-  updateStats();
-});
-
-// ── RENDER ──
-function render() {
-  renderDateTabs();
-  renderGrid();
-  updateStats();
+document.getElementById("modeOpen").addEventListener("click", ()=>setMode("open"));
+document.getElementById("modeHoliday").addEventListener("click", ()=>setMode("holiday"));
+function setMode(m){
+  mode = m;
+  document.body.classList.toggle("mode-holiday", m==="holiday");
+  document.getElementById("modeOpen").classList.toggle("active", m==="open");
+  document.getElementById("modeHoliday").classList.toggle("active", m==="holiday");
+  scheduleRender();
 }
 
-function renderDateTabs() {
-  // collect all dates from checkins + today
-  const dates = new Set([todayStr()]);
-  Object.values(checkins).forEach(c => { if (c.date) dates.add(c.date); });
-  const sorted = [...dates].sort().reverse();
+["inpDate","inpPlace","inpSpot","inpNote","inpHolidayMsg"].forEach(id=>{
+  document.getElementById(id).addEventListener("input", scheduleRender);
+});
 
-  const tabs = document.getElementById('date-tabs');
-  tabs.innerHTML = sorted.map(d => `
-    <button class="date-tab ${d === activeDate ? 'active' : ''}" onclick="setActiveDate('${d}')">
-      ${d === todayStr() ? '今天' : fmtDate(d)}
-    </button>
-  `).join('');
+/* ---- 繪圖小工具 ---- */
+function rr(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
 }
-
-function renderGrid() {
-  const grid = document.getElementById('vendor-grid');
-  const arr  = Object.entries(vendors).map(([id,v]) => ({ id, ...v }));
-
-  if (!arr.length) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-      <div class="empty-icon">🛒</div>
-      還沒有攤商<br>點右上角 ＋ 新增
-    </div>`;
-    return;
+function serif(weight,size){ return `${weight} ${size}px "Noto Serif TC", serif`; }
+function fitSize(text, weight, baseSize, maxWidth){
+  let s = baseSize;
+  ctx.font = serif(weight, s);
+  while (ctx.measureText(text).width > maxWidth && s > 20){
+    s -= 2; ctx.font = serif(weight, s);
   }
-
-  // find checkin for each vendor on activeDate
-  grid.innerHTML = arr.map(v => {
-    const checkin = Object.values(checkins).find(c => c.vendorId === v.id && c.date === activeDate);
-    const done = !!checkin;
-    const timeStr = checkin ? fmtTime(checkin.ts) : '';
-    return `
-    <div class="vendor-card ${done ? 'done' : ''}"
-      data-vendor-id="${v.id}"
-      ontouchstart="vcTouchStart(event,'${v.id}')"
-      ontouchend="vcTouchEnd(event,'${v.id}')"
-      ontouchcancel="vcTouchCancel('${v.id}')"
-      onclick="vcClick('${v.id}')">
-      <div class="done-badge">✓</div>
-      <div class="vendor-icon" style="font-size:52px;font-weight:900;line-height:1;color:var(--text)">${esc(v.icon || v.name.slice(0,1))}</div>
-      <div class="vendor-name">${esc(v.name)}</div>
-      ${done ? `<div class="vendor-time">✓ ${timeStr}</div>` : ''}
-      ${v.contact || v.phone ? `<div class="vendor-contact">${v.contact ? esc(v.contact) : ''}${v.contact && v.phone ? ' · ' : ''}${v.phone ? `<a href="tel:${esc(v.phone)}" style="color:var(--accent);text-decoration:none" onclick="event.stopPropagation()">📞 ${esc(v.phone)}</a>` : ''}</div>` : ''}
-    </div>`;
-  }).join('');
+  return s;
 }
-
-function updateStats() {
-  const todayCheckins = Object.values(checkins).filter(c => c.date === activeDate);
-  const count = todayCheckins.length;
-  const money = count * (settings.rate || 100);
-
-  document.getElementById('stat-done').textContent  = count;
-  document.getElementById('stat-money').textContent = '$' + money.toLocaleString();
-  document.getElementById('sum-done').textContent   = count;
-  document.getElementById('sum-money').textContent  = '$' + money.toLocaleString();
-
-  const isToday = activeDate === todayStr();
-  if (count === 0) {
-    document.getElementById('sum-sub').textContent = isToday ? '今天還沒有打卡紀錄' : '這天沒有打卡紀錄';
-  } else {
-    const times = Object.values(checkins)
-      .filter(c => c.date === activeDate && c.ts)
-      .map(c => c.ts).sort();
-    const first = times.length ? fmtTime(times[0]) : '';
-    const last  = times.length ? fmtTime(times[times.length-1]) : '';
-    document.getElementById('sum-sub').textContent =
-      `${first} – ${last}・每攤 $${settings.rate}`;
-  }
-}
-
-// ── Date tab ──
-window.setActiveDate = function(d) {
-  activeDate = d;
-  render();
-};
-
-// ── Long press ──
-const lpTimers = {};
-window.vcTouchStart = function(e, id) {
-  lpTimers[id] = setTimeout(() => {
-    lpTimers[id] = null;
-    document.querySelector(`[data-vendor-id="${id}"]`)?.classList.add('long-pressing');
-    openEditVendor(id);
-  }, 600);
-};
-window.vcTouchEnd = function(e, id) {
-  if (lpTimers[id]) { clearTimeout(lpTimers[id]); lpTimers[id] = null; }
-  document.querySelector(`[data-vendor-id="${id}"]`)?.classList.remove('long-pressing');
-};
-window.vcTouchCancel = function(id) {
-  if (lpTimers[id]) { clearTimeout(lpTimers[id]); lpTimers[id] = null; }
-  document.querySelector(`[data-vendor-id="${id}"]`)?.classList.remove('long-pressing');
-};
-
-// ── CHECK IN / UNDO ──
-window.vcClick = async function(id) {
-  if (lpTimers[id] === null) return; // was long press
-  const existing = Object.entries(checkins).find(([,c]) => c.vendorId === id && c.date === activeDate);
-
-  if (existing) {
-    // already done → confirm undo
-    const [cid] = existing;
-    if (confirm(`取消「${vendors[id]?.name}」的打卡紀錄？`)) {
-      await remove(ref(db, 'checkins/' + cid));
-      showToast('已取消打卡', false);
+function wrapLines(text, weight, size, maxWidth){
+  const out = [];
+  for (const raw of text.split("\n")){
+    let line = "";
+    ctx.font = serif(weight, size);
+    for (const ch of raw){
+      if (ctx.measureText(line + ch).width > maxWidth && line){ out.push(line); line = ch; }
+      else line += ch;
     }
-  } else {
-    // check in
-    const now = new Date();
-    const result = await push(checkinsRef, {
-      vendorId: id,
-      vendorName: vendors[id]?.name || '',
-      date: activeDate,
-      ts: now.getTime()
-    });
-    lastUndoId = result.key;
-    showToast(`✓ ${vendors[id]?.name} 打卡完成`, true);
+    out.push(line);
   }
-};
-
-window.undoCheckin = async function() {
-  if (!lastUndoId) return;
-  await remove(ref(db, 'checkins/' + lastUndoId));
-  lastUndoId = null;
-  showToast('已復原', false);
-};
-
-// ── TOAST ──
-function showToast(msg, showUndo) {
-  clearTimeout(toastTimer);
-  document.getElementById('toast-msg').textContent = msg;
-  const undoEl = document.getElementById('toast-undo');
-  undoEl.style.display = showUndo ? 'inline' : 'none';
-  document.getElementById('toast').classList.add('show');
-  toastTimer = setTimeout(() => {
-    document.getElementById('toast').classList.remove('show');
-  }, showUndo ? 4000 : 2000);
+  return out;
 }
 
-// ── VENDOR MODAL ──
-// emoji picker removed – using single char input
-
-window.openAddVendor = function() {
-  editingVendorId = null;
-  document.getElementById('vendor-modal-title').textContent = '新增攤商';
-  document.getElementById('vm-name').value = '';
-  document.getElementById('vm-icon-char').value = '';
-  document.getElementById('vm-contact').value = '';
-  document.getElementById('vm-phone').value = '';
-  document.getElementById('vm-note').value = '';
-  document.getElementById('vendor-modal-actions').innerHTML = `
-    <button class="modal-btn cancel" onclick="closeVendorModal()">取消</button>
-    <button class="modal-btn save" onclick="saveVendor()">儲存</button>
-  `;
-  document.getElementById('vendor-modal').classList.add('open');
-};
-
-function openEditVendor(id) {
-  const v = vendors[id]; if (!v) return;
-  editingVendorId = id;
-  document.getElementById('vendor-modal-title').textContent = '編輯攤商';
-  document.getElementById('vm-name').value      = v.name || '';
-  document.getElementById('vm-icon-char').value = v.icon || v.name.slice(0,1) || '';
-  document.getElementById('vm-contact').value   = v.contact || '';
-  document.getElementById('vm-phone').value     = v.phone || '';
-  document.getElementById('vm-note').value      = v.note || '';
-  document.getElementById('vendor-modal-actions').innerHTML = `
-    <button class="modal-btn delete" onclick="deleteVendor('${id}')">刪除</button>
-    <button class="modal-btn cancel" onclick="closeVendorModal()">取消</button>
-    <button class="modal-btn save" onclick="saveVendor()">儲存</button>
-  `;
-  document.getElementById('vendor-modal').classList.add('open');
+/* 背景斜紋 */
+let stripePattern = null;
+function getStripes(){
+  if (stripePattern) return stripePattern;
+  const p = document.createElement("canvas"); p.width = 28; p.height = 28;
+  const c = p.getContext("2d");
+  c.strokeStyle = "rgba(255,255,255,0.030)"; c.lineWidth = 3;
+  c.beginPath();
+  for (let i=-28;i<=56;i+=14){ c.moveTo(i,28); c.lineTo(i+28,0); }
+  c.stroke();
+  stripePattern = ctx.createPattern(p,"repeat");
+  return stripePattern;
+}
+/* 仿舊紙斑點（固定亂數，避免每次重繪閃動） */
+function speckle(x,y,w,h,seed){
+  let s = seed;
+  const rnd = ()=> (s = (s*16807)%2147483647) / 2147483647;
+  ctx.save();
+  ctx.fillStyle = "rgba(90,70,30,0.10)";
+  const n = Math.floor(w*h/3800);
+  for(let i=0;i<n;i++){
+    ctx.beginPath();
+    ctx.arc(x+rnd()*w, y+rnd()*h, rnd()*1.7+0.4, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
 }
 
-window.closeVendorModal = function(e) {
-  if (e && e.target !== document.getElementById('vendor-modal')) return;
-  document.getElementById('vendor-modal').classList.remove('open');
-};
+const WD = ["日","一","二","三","四","五","六"];
+function dateText(){
+  const v = inpDate.value;
+  if(!v) return "";
+  const d = new Date(v + "T00:00:00");
+  return `${d.getMonth()+1} 月 ${d.getDate()} 日（星期${WD[d.getDay()]}）`;
+}
 
-window.saveVendor = async function() {
-  const name    = document.getElementById('vm-name').value.trim();
-  const contact = document.getElementById('vm-contact').value.trim();
-  const phone   = document.getElementById('vm-phone').value.trim();
-  const note    = document.getElementById('vm-note').value.trim();
-  if (!name) { alert('請輸入攤商名稱'); return; }
-  const iconChar = (document.getElementById('vm-icon-char').value.trim() || name.slice(0,1));
-  const data = { name, icon: iconChar, contact, phone, note };
-  if (editingVendorId) await update(ref(db, 'vendors/' + editingVendorId), data);
-  else await push(vendorsRef, data);
-  document.getElementById('vendor-modal').classList.remove('open');
-  showToast(editingVendorId ? '✏️ 攤商已更新' : '✅ 攤商已新增', false);
-};
+/* ---- 共用區塊 ---- */
+function drawBase(){
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,"#214233"); g.addColorStop(.5,C.green); g.addColorStop(1,"#142519");
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = getStripes(); ctx.fillRect(0,0,W,H);
+  /* 金色細框 */
+  ctx.strokeStyle = "rgba(201,168,92,0.55)"; ctx.lineWidth = 3;
+  rr(34,34,W-68,H-68,26); ctx.stroke();
+  ctx.strokeStyle = "rgba(201,168,92,0.22)"; ctx.lineWidth = 1.5;
+  rr(48,48,W-96,H-96,20); ctx.stroke();
+}
 
-window.deleteVendor = async function(id) {
-  if (!confirm('確定刪除這個攤商？')) return;
-  await remove(ref(db, 'vendors/' + id));
-  document.getElementById('vendor-modal').classList.remove('open');
-  showToast('🗑 攤商已刪除', false);
-};
+function drawLogo(cy, r){
+  const cx = W/2;
+  ctx.save();
+  /* 光暈 */
+  ctx.shadowColor = "rgba(0,0,0,0.55)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 14;
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.fillStyle = C.cream; ctx.fill();
+  ctx.restore();
 
-// ── SETTINGS MODAL ──
-window.openSettings = function() {
-  document.getElementById('sm-rate').value = settings.rate;
-  document.getElementById('settings-modal').classList.add('open');
-};
-window.closeSettingsModal = function(e) {
-  if (e && e.target !== document.getElementById('settings-modal')) return;
-  document.getElementById('settings-modal').classList.remove('open');
-};
-window.saveSettings = async function() {
-  const rate = parseInt(document.getElementById('sm-rate').value) || 100;
-  settings.rate = rate;
-  document.getElementById('rate-input').value = rate;
-  await update(settingsRef, { rate });
-  document.getElementById('settings-modal').classList.remove('open');
-  updateStats();
-  showToast('✅ 設定已儲存', false);
-};
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.clip();
+  if (logoReady){
+    ctx.drawImage(logoImg, cx-r, cy-r, r*2, r*2);
+  } else {
+    ctx.fillStyle = C.cream; ctx.fillRect(cx-r,cy-r,r*2,r*2);
+    ctx.fillStyle = C.greenInk; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.font = serif(900, r*0.42);
+    ctx.fillText("阿桂嬤", cx, cy - r*0.18);
+    ctx.font = serif(700, r*0.2);
+    ctx.fillText("養生湯飲", cx, cy + r*0.3);
+  }
+  ctx.restore();
+  /* 金環 */
+  ctx.strokeStyle = C.gold; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.arc(cx,cy,r+4,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle = "rgba(201,168,92,0.45)"; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(cx,cy,r+12,0,Math.PI*2); ctx.stroke();
+}
+
+function drawDivider(y, halfW){
+  const cx = W/2;
+  ctx.strokeStyle = "rgba(201,168,92,0.7)"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(cx-halfW,y); ctx.lineTo(cx-26,y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+26,y); ctx.lineTo(cx+halfW,y); ctx.stroke();
+  ctx.save();
+  ctx.translate(cx,y); ctx.rotate(Math.PI/4);
+  ctx.fillStyle = C.gold; ctx.fillRect(-9,-9,18,18);
+  ctx.restore();
+}
+
+/* 紅底印章橫匾 */
+function sealBanner(text, cy, fontSize){
+  const cx = W/2;
+  ctx.font = serif(900, fontSize);
+  const tw = ctx.measureText(text).width;
+  const padX = 70, bw = tw + padX*2, bh = fontSize + 76;
+  const x = cx - bw/2, y = cy - bh/2;
+  ctx.save();
+  ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 24; ctx.shadowOffsetY = 8;
+  const g = ctx.createLinearGradient(0,y,0,y+bh);
+  g.addColorStop(0,"#b13328"); g.addColorStop(1,C.redDeep);
+  ctx.fillStyle = g; rr(x,y,bw,bh,22); ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle = C.gold; ctx.lineWidth = 3;
+  rr(x+8,y+8,bw-16,bh-16,15); ctx.stroke();
+  ctx.fillStyle = C.cream; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.font = serif(900, fontSize);
+  ctx.fillText(text, cx, cy + 4);
+  return bh;
+}
+
+function drawFooter(){
+  const cx = W/2;
+  /* 標語膠囊 */
+  ctx.font = serif(700, 33);
+  const tw = ctx.measureText(FOOT_LINE).width;
+  const bw = tw + 90, bh = 74, y = H - 200;
+  ctx.strokeStyle = C.gold; ctx.lineWidth = 2.5;
+  rr(cx-bw/2, y, bw, bh, bh/2); ctx.stroke();
+  ctx.fillStyle = C.gold; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillText(FOOT_LINE, cx, y + bh/2 + 2);
+  /* IG */
+  ctx.font = `500 30px "Noto Sans TC", sans-serif`;
+  ctx.fillStyle = "rgba(243,234,210,0.85)";
+  ctx.fillText("Instagram " + IG_HANDLE, cx, H - 86);
+}
+
+/* ---- 出攤版面 ---- */
+function renderOpen(){
+  drawBase();
+  drawLogo(258, 188);
+
+  const cx = W/2;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+
+  /* 英文副標 */
+  ctx.font = `italic 600 30px "Noto Serif TC", serif`;
+  ctx.fillStyle = C.gold;
+  ctx.fillText("Grandma A-Gui's Herbal Drinks", cx, 492);
+
+  drawDivider(540, 230);
+
+  /* 日期 */
+  ctx.font = serif(600, 36);
+  ctx.fillStyle = "rgba(243,234,210,0.9)";
+  ctx.fillText(dateText(), cx, 600);
+
+  /* 今日出攤 */
+  sealBanner("今 日 出 攤", 702, 84);
+
+  /* 地點米黃匾 */
+  const place = document.getElementById("inpPlace").value.trim() || "台南花園夜市";
+  const spot  = document.getElementById("inpSpot").value.trim();
+  const note  = document.getElementById("inpNote").value.trim();
+
+  const px = 110, pw = W - px*2;
+  const ph = spot ? (note ? 252 : 212) : (note ? 206 : 156);
+  const py = 796;
+  ctx.save();
+  ctx.shadowColor="rgba(0,0,0,0.35)"; ctx.shadowBlur=20; ctx.shadowOffsetY=7;
+  ctx.fillStyle = C.cream; rr(px,py,pw,ph,20); ctx.fill();
+  ctx.restore();
+  speckle(px,py,pw,ph,12345);
+  ctx.strokeStyle = C.red; ctx.lineWidth = 3; rr(px,py,pw,ph,20); ctx.stroke();
+  ctx.strokeStyle = "rgba(176,142,69,0.7)"; ctx.lineWidth = 1.5; rr(px+9,py+9,pw-18,ph-18,13); ctx.stroke();
+
+  let ly = py + (spot||note ? 64 : ph/2);
+  const ps = fitSize(place, 900, 64, pw-90);
+  ctx.font = serif(900, ps); ctx.fillStyle = C.inkGreen;
+  ctx.fillText(place, cx, ly);
+  if (spot){
+    ly += 70;
+    const ss = fitSize(spot, 700, 48, pw-90);
+    ctx.font = serif(700, ss); ctx.fillStyle = C.red;
+    ctx.fillText(spot, cx, ly);
+  }
+  if (note){
+    ly += spot ? 62 : 66;
+    const ns = fitSize(note, 600, 34, pw-90);
+    ctx.font = serif(600, ns); ctx.fillStyle = "#5c5132";
+    ctx.fillText(note, cx, ly);
+  }
+
+  /* 品項卡 */
+  const items = MENU.filter(m=>m.checked);
+  const ix = 90, iw = W - ix*2;
+  const iy = py + ph + 36;
+  const ih = (H - 240) - iy;
+  ctx.save();
+  ctx.shadowColor="rgba(0,0,0,0.35)"; ctx.shadowBlur=20; ctx.shadowOffsetY=7;
+  ctx.fillStyle = C.cream; rr(ix,iy,iw,ih,22); ctx.fill();
+  ctx.restore();
+  speckle(ix,iy,iw,ih,54321);
+  ctx.strokeStyle = C.gold; ctx.lineWidth = 3.5; rr(ix,iy,iw,ih,22); ctx.stroke();
+  ctx.strokeStyle = "rgba(163,42,34,0.55)"; ctx.lineWidth = 1.5; rr(ix+10,iy+10,iw-20,ih-20,14); ctx.stroke();
+
+  /* 卡片標題 */
+  const headY = iy + 64;
+  ctx.font = serif(900, 44); ctx.fillStyle = C.red;
+  const ht = "今 日 供 應";
+  ctx.fillText(ht, cx, headY);
+  const htw = ctx.measureText(ht).width;
+  ctx.strokeStyle = "rgba(163,42,34,0.5)"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(ix+58, headY); ctx.lineTo(cx-htw/2-30, headY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+htw/2+30, headY); ctx.lineTo(ix+iw-58, headY); ctx.stroke();
+
+  if (!items.length){
+    ctx.font = serif(600, 40); ctx.fillStyle = "#7a6c44";
+    ctx.fillText("（請在下方勾選今日品項）", cx, iy + ih/2);
+  } else {
+    const listTop = headY + 46;
+    const listBottom = iy + ih - 44;
+    const rowH = Math.min(118, (listBottom - listTop) / items.length);
+    const startY = listTop + ((listBottom-listTop) - rowH*items.length)/2;
+    const nameSize = Math.min(50, rowH*0.56);
+    const lx = ix + 64, rxx = ix + iw - 64;
+
+    items.forEach((m,i)=>{
+      const ry = startY + rowH*i + rowH/2;
+      ctx.textBaseline = "middle";
+
+      /* 標籤 */
+      let nx = lx;
+      if (m.badge){
+        const bs = nameSize*0.52;
+        ctx.font = serif(700, bs);
+        const bw2 = ctx.measureText(m.badge).width + 26, bh2 = bs + 18;
+        const isHot = m.badge === "招牌";
+        ctx.fillStyle = isHot ? C.red : C.greenInk;
+        rr(nx, ry-bh2/2, bw2, bh2, 7); ctx.fill();
+        if (!isHot){ ctx.strokeStyle=C.goldSoft; ctx.lineWidth=1.5; rr(nx,ry-bh2/2,bw2,bh2,7); ctx.stroke(); }
+        ctx.fillStyle = C.cream; ctx.textAlign = "center";
+        ctx.fillText(m.badge, nx+bw2/2, ry+1.5);
+        nx += bw2 + 22;
+      }
+
+      /* 品名 */
+      ctx.textAlign = "left";
+      ctx.font = serif(700, nameSize); ctx.fillStyle = C.inkGreen;
+      ctx.fillText(m.name, nx, ry);
+      const nw = ctx.measureText(m.name).width;
+
+      /* 價格 */
+      ctx.textAlign = "right";
+      ctx.font = `500 ${nameSize*0.56}px "Noto Sans TC", sans-serif`;
+      const unitW = ctx.measureText(" /杯").width;
+      ctx.fillStyle = "#7a6c44";
+      ctx.fillText("/杯", rxx, ry+4);
+      ctx.font = serif(900, nameSize*0.92);
+      ctx.fillStyle = C.red;
+      const priceStr = "$" + m.price;
+      ctx.fillText(priceStr, rxx - unitW, ry);
+      const pwd = ctx.measureText(priceStr).width;
+
+      /* 點點引線 */
+      const dotA = nx + nw + 26, dotB = rxx - unitW - pwd - 26;
+      if (dotB - dotA > 14){
+        ctx.save();
+        ctx.strokeStyle = "rgba(122,108,68,0.55)"; ctx.lineWidth = 2.5;
+        ctx.setLineDash([1.2, 11]); ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(dotA, ry+8);
+        ctx.lineTo(dotB, ry+8);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      /* 分隔線 */
+      if (i < items.length-1){
+        ctx.strokeStyle = "rgba(122,108,68,0.18)"; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(ix+56, startY + rowH*(i+1));
+        ctx.lineTo(ix+iw-56, startY + rowH*(i+1));
+        ctx.stroke();
+      }
+    });
+  }
+  ctx.textAlign = "center";
+  drawFooter();
+}
+
+/* ---- 公休版面 ---- */
+function renderHoliday(){
+  drawBase();
+  drawLogo(420, 250);
+
+  const cx = W/2;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+
+  ctx.font = `italic 600 32px "Noto Serif TC", serif`;
+  ctx.fillStyle = C.gold;
+  ctx.fillText("Grandma A-Gui's Herbal Drinks", cx, 728);
+
+  drawDivider(786, 250);
+
+  ctx.font = serif(600, 40);
+  ctx.fillStyle = "rgba(243,234,210,0.9)";
+  ctx.fillText(dateText(), cx, 866);
+
+  sealBanner("今 日 公 休", 1010, 104);
+
+  /* 訊息米黃卡 */
+  const msg = document.getElementById("inpHolidayMsg").value.trim() || "好好休息，養精蓄銳";
+  const px = 130, pw = W - px*2;
+  const lines = wrapLines(msg, 700, 46, pw - 110);
+  const lineH = 76;
+  const ph = Math.max(190, lines.length*lineH + 96);
+  const py = 1170;
+  ctx.save();
+  ctx.shadowColor="rgba(0,0,0,0.35)"; ctx.shadowBlur=20; ctx.shadowOffsetY=7;
+  ctx.fillStyle = C.cream; rr(px,py,pw,ph,22); ctx.fill();
+  ctx.restore();
+  speckle(px,py,pw,ph,9876);
+  ctx.strokeStyle = C.gold; ctx.lineWidth = 3.5; rr(px,py,pw,ph,22); ctx.stroke();
+  ctx.strokeStyle = "rgba(163,42,34,0.55)"; ctx.lineWidth = 1.5; rr(px+10,py+10,pw-20,ph-20,14); ctx.stroke();
+
+  ctx.font = serif(700, 46); ctx.fillStyle = C.inkGreen;
+  const ty = py + ph/2 - (lines.length-1)*lineH/2;
+  lines.forEach((l,i)=> ctx.fillText(l, cx, ty + i*lineH));
+
+  drawFooter();
+}
+
+/* ---- 渲染與輸出 ---- */
+let renderTimer = null, fontsLoaded = false;
+function scheduleRender(){
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(render, 220);
+}
+async function render(){
+  if (!fontsLoaded){
+    try{
+      await Promise.all([
+        document.fonts.load('900 80px "Noto Serif TC"'),
+        document.fonts.load('700 50px "Noto Serif TC"'),
+        document.fonts.load('600 36px "Noto Serif TC"'),
+        document.fonts.load('500 30px "Noto Sans TC"'),
+        document.fonts.ready,
+      ]);
+    }catch(e){}
+    fontsLoaded = true;
+  }
+  ctx.clearRect(0,0,W,H);
+  (mode === "open" ? renderOpen : renderHoliday)();
+  document.getElementById("previewImg").src = cv.toDataURL("image/png");
+}
+
+document.getElementById("btnDownload").addEventListener("click", ()=>{
+  const a = document.createElement("a");
+  const d = inpDate.value.replaceAll("-","");
+  a.download = `阿桂嬤限動_${d}${mode==="holiday"?"_公休":""}.png`;
+  a.href = cv.toDataURL("image/png");
+  a.click();
+});
+
+render();
+window.addEventListener("load", scheduleRender);
 </script>
 </body>
 </html>
