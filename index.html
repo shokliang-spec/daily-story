@@ -186,12 +186,8 @@
     </label>
 
     <div class="open-only">
-      <label class="field">擺攤地點
-        <input type="text" id="inpPlace" value="台南花園夜市" placeholder="例：台南花園夜市">
-      </label>
-      <label class="field">攤位位置（選填）
-        <input type="text" id="inpSpot" placeholder="例：C 區 12 號攤位" value="">
-      </label>
+      <p class="field" style="margin-top:14px">擺攤地點（勾選後可填攤位位置）</p>
+      <div class="items" id="locList" style="margin-top:6px"></div>
       <label class="field">補充說明（選填，會顯示在地點下方）
         <input type="text" id="inpNote" placeholder="例：營業到午夜 12 點・賣完為止" value="">
       </label>
@@ -208,7 +204,7 @@
   <section class="panel open-only">
     <h2>今日供應品項</h2>
     <div class="items" id="itemList"></div>
-    <p class="hint">勾選今天有賣的品項。建議 4～6 款版面最好看；全選 8 款也放得下。</p>
+    <p class="hint">勾選今天推薦的品項。建議 4～6 款版面最好看；地點勾 2 個以上時，品項建議 4 款以內，字才夠大。</p>
   </section>
 
   <section id="previewWrap">
@@ -267,6 +263,45 @@ const inpDate = document.getElementById("inpDate");
   inpDate.value = t.getFullYear() + "-" + String(t.getMonth()+1).padStart(2,"0") + "-" + String(t.getDate()).padStart(2,"0");
 })();
 
+/* ====== 擺攤地點（要新增或改名，改這裡就好） ====== */
+const MARKETS = [
+  { name:"台南花園夜市", checked:true,  spot:"" },
+  { name:"小北夜市",     checked:false, spot:"" },
+  { name:"新永華夜市",   checked:false, spot:"" },
+  { name:"武聖夜市",     checked:false, spot:"" },
+];
+
+const locList = document.getElementById("locList");
+MARKETS.forEach((m,i)=>{
+  const row = document.createElement("label");
+  row.className = "item" + (m.checked ? " checked" : "");
+  row.innerHTML = `
+    <input type="checkbox" class="loc-chk" data-i="${i}" ${m.checked?"checked":""}>
+    <span class="name">${m.name}</span>
+    <input type="text" class="loc-spot" data-i="${i}" placeholder="位置（選填）"
+      value="${m.spot}" ${m.checked?"":"disabled"}
+      style="width:120px;flex:none;margin:0;padding:7px 9px;font-size:.85rem">`;
+  locList.appendChild(row);
+});
+locList.addEventListener("change", e=>{
+  if (!e.target.classList.contains("loc-chk")) return;
+  const i = +e.target.dataset.i;
+  MARKETS[i].checked = e.target.checked;
+  const row = e.target.closest(".item");
+  row.classList.toggle("checked", e.target.checked);
+  row.querySelector(".loc-spot").disabled = !e.target.checked;
+  scheduleRender();
+});
+locList.addEventListener("input", e=>{
+  if (!e.target.classList.contains("loc-spot")) return;
+  MARKETS[+e.target.dataset.i].spot = e.target.value;
+  scheduleRender();
+});
+/* 避免點到輸入框時誤觸 checkbox */
+locList.addEventListener("click", e=>{
+  if (e.target.classList.contains("loc-spot")) e.preventDefault();
+});
+
 const itemList = document.getElementById("itemList");
 MENU.forEach((m,i)=>{
   const row = document.createElement("label");
@@ -295,7 +330,7 @@ function setMode(m){
   scheduleRender();
 }
 
-["inpDate","inpPlace","inpSpot","inpNote","inpHolidayMsg"].forEach(id=>{
+["inpDate","inpNote","inpHolidayMsg"].forEach(id=>{
   document.getElementById(id).addEventListener("input", scheduleRender);
 });
 
@@ -481,13 +516,24 @@ function renderOpen(){
   /* 今日出攤 */
   sealBanner("今 日 出 攤", 702, 84);
 
-  /* 地點米黃匾 */
-  const place = document.getElementById("inpPlace").value.trim() || "台南花園夜市";
-  const spot  = document.getElementById("inpSpot").value.trim();
-  const note  = document.getElementById("inpNote").value.trim();
+  /* 地點米黃匾（支援多攤勾選） */
+  const locs = MARKETS.filter(m=>m.checked)
+                      .map(m=>({place:m.name, spot:m.spot.trim()}));
+  if (!locs.length) locs.push({place:"台南花園夜市", spot:""});
+  const note = document.getElementById("inpNote").value.trim();
+
+  const two = locs.length > 1;
+  const many = locs.length > 2;
+  const placeFS = many ? 48 : (two ? 56 : 64), spotFS = many ? 38 : (two ? 42 : 48);
+  const placeLH = many ? 58 : (two ? 66 : 76), spotLH = many ? 50 : (two ? 56 : 64);
+  const divGap = many ? 38 : 50, noteLH = 56;
 
   const px = 110, pw = W - px*2;
-  const ph = spot ? (note ? 252 : 212) : (note ? 206 : 156);
+  let ph = 50 + 46;
+  locs.forEach(l => { ph += placeLH + (l.spot ? spotLH : 0); });
+  ph += (locs.length-1) * divGap;
+  if (note) ph += noteLH + 6;
+  ph = Math.max(ph, 156);
   const py = 796;
   ctx.save();
   ctx.shadowColor="rgba(0,0,0,0.35)"; ctx.shadowBlur=20; ctx.shadowOffsetY=7;
@@ -497,18 +543,40 @@ function renderOpen(){
   ctx.strokeStyle = C.red; ctx.lineWidth = 3; rr(px,py,pw,ph,20); ctx.stroke();
   ctx.strokeStyle = "rgba(176,142,69,0.7)"; ctx.lineWidth = 1.5; rr(px+9,py+9,pw-18,ph-18,13); ctx.stroke();
 
-  let ly = py + (spot||note ? 64 : ph/2);
-  const ps = fitSize(place, 900, 64, pw-90);
-  ctx.font = serif(900, ps); ctx.fillStyle = C.inkGreen;
-  ctx.fillText(place, cx, ly);
-  if (spot){
-    ly += 70;
-    const ss = fitSize(spot, 700, 48, pw-90);
-    ctx.font = serif(700, ss); ctx.fillStyle = C.red;
-    ctx.fillText(spot, cx, ly);
-  }
+  let ly = py + 50;
+  /* 內容總高度若小於卡片，置中微調 */
+  let contentH = locs.reduce((a,l)=> a + placeLH + (l.spot?spotLH:0), 0)
+               + (locs.length-1)*divGap + (note ? noteLH+6 : 0);
+  ly += Math.max(0, (ph - 50 - 46 - contentH) / 2);
+
+  locs.forEach((l, idx)=>{
+    ly += placeLH/2;
+    const ps = fitSize(l.place, 900, placeFS, pw-90);
+    ctx.font = serif(900, ps); ctx.fillStyle = C.inkGreen;
+    ctx.fillText(l.place, cx, ly);
+    ly += placeLH/2;
+    if (l.spot){
+      ly += spotLH/2;
+      const ss = fitSize(l.spot, 700, spotFS, pw-90);
+      ctx.font = serif(700, ss); ctx.fillStyle = C.red;
+      ctx.fillText(l.spot, cx, ly);
+      ly += spotLH/2;
+    }
+    if (idx < locs.length-1){
+      ly += divGap/2;
+      /* 兩攤之間的小分隔 */
+      ctx.strokeStyle = "rgba(163,42,34,0.45)"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(cx-130, ly); ctx.lineTo(cx-22, ly); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx+22, ly); ctx.lineTo(cx+130, ly); ctx.stroke();
+      ctx.save();
+      ctx.translate(cx, ly); ctx.rotate(Math.PI/4);
+      ctx.fillStyle = "rgba(163,42,34,0.65)"; ctx.fillRect(-6,-6,12,12);
+      ctx.restore();
+      ly += divGap/2;
+    }
+  });
   if (note){
-    ly += spot ? 62 : 66;
+    ly += noteLH/2 + 6;
     const ns = fitSize(note, 600, 34, pw-90);
     ctx.font = serif(600, ns); ctx.fillStyle = "#5c5132";
     ctx.fillText(note, cx, ly);
@@ -530,7 +598,7 @@ function renderOpen(){
   /* 卡片標題 */
   const headY = iy + 64;
   ctx.font = serif(900, 44); ctx.fillStyle = C.red;
-  const ht = "今 日 供 應";
+  const ht = "每 日 推 薦";
   ctx.fillText(ht, cx, headY);
   const htw = ctx.measureText(ht).width;
   ctx.strokeStyle = "rgba(163,42,34,0.5)"; ctx.lineWidth = 2;
@@ -543,6 +611,13 @@ function renderOpen(){
   } else {
     const listTop = headY + 46;
     const listBottom = iy + ih - 44;
+    if (listBottom - listTop < items.length * 34){
+      ctx.font = serif(600, 36); ctx.fillStyle = "#7a6c44";
+      ctx.fillText("（版面不足：請減少品項或地點）", cx, Math.max(headY + 70, iy + ih/2));
+      ctx.textAlign = "center";
+      drawFooter();
+      return;
+    }
     const rowH = Math.min(118, (listBottom - listTop) / items.length);
     const startY = listTop + ((listBottom-listTop) - rowH*items.length)/2;
     const nameSize = Math.min(50, rowH*0.56);
