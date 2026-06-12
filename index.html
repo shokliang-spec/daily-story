@@ -95,6 +95,16 @@
     border:1px solid var(--gold-soft);border-radius:9px;
     padding:11px 12px;font-size:1rem;font-family:'Noto Sans TC',sans-serif;
   }
+  /* iOS Safari：日期欄位會用內建寬度爆出容器，強制收乾 */
+  input[type="date"]{
+    -webkit-appearance:none;
+    appearance:none;
+    display:block;
+    min-width:0;
+    max-width:100%;
+    min-height:48px;
+    text-align:left;
+  }
   textarea{resize:vertical;min-height:74px;line-height:1.6}
   input:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
 
